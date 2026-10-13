@@ -1,0 +1,29 @@
+:root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; --sidebar-width: 180px; }
+* { box-sizing: border-box; }
+body { margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #dadde1; color: #253347; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 8px; background: #f5f7fa; border-bottom: 1px solid #bbc5d1; }
+button, input, select { font: inherit; min-height: 30px; border: 1px solid #bac5d2; border-radius: 5px; background: white; color: inherit; padding: 3px 7px; }
+button { cursor: pointer; }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible, #splitter:focus-visible { outline: 2px solid #2979c5; outline-offset: -2px; }
+#page { width: 55px; }
+#search { width: 125px; min-width: 80px; flex: 1; }
+#matches { font-variant-numeric: tabular-nums; }
+main { display: flex; flex: 1; min-height: 0; min-width: 0; }
+#sidebar { width: var(--sidebar-width); flex: 0 0 var(--sidebar-width); display: flex; flex-direction: column; min-height: 0; background: #eef1f5; }
+#sidebar nav { display: flex; gap: 4px; padding: 7px; }
+#sidebar nav button { flex: 1; padding-inline: 3px; }
+[aria-pressed="true"] { background: #dceafd; border-color: #6d98c6; }
+#thumbnails, #outline { overflow: auto; padding: 10px; flex: 1; }
+#thumbnails button { display: flex; width: 100%; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 12px; padding: 8px; }
+#thumbnails canvas { display: block; width: 100%; height: auto; background: white; }
+#thumbnails [aria-current="true"] { border-color: #2979c5; box-shadow: 0 0 0 1px #2979c5; }
+#outline button { display: block; width: 100%; text-align: left; margin-bottom: 5px; overflow-wrap: anywhere; }
+#splitter { width: 7px; flex: 0 0 7px; cursor: col-resize; touch-action: none; background: #c6ced8; }
+#splitter:hover, body.resizing #splitter { background: #588fc8; }
+body.resizing { cursor: col-resize; user-select: none; }
+body.sidebar-hidden #sidebar, body.sidebar-hidden #splitter { display: none; }
+#document { flex: 1; min-width: 0; min-height: 0; position: relative; }
+#viewerContainer { position: absolute; inset: 0; overflow: auto; }
+#status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 16px; background: white; border-radius: 8px; max-width: 90%; overflow-wrap: anywhere; }
+[hidden] { display: none !important; }

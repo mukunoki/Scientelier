@@ -1,0 +1,41 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { runInNewContext } from "node:vm";
+
+test("new terminal starts follow each CLI once, without overriding subsequent history selection", async () => {
+  const state = {selectedTerminalAgents:new Map(),selectedTaskId:"other",selectedTaskPanels:new Map([["t","overview"]])};
+  const source = await readFile("dist/renderer/terminals.js","utf8");
+  const view = runInNewContext(`${source}\n({followStartedTerminals,terminalRunSelections,terminalTiledTasks})`,{state});
+  const task = (runs: any[], id = "t") => ({id,runs});
+  const run = (id: string, agentId = "claude", status = "running") => ({id,agentId,state:status,terminal:true});
+  const old = task([run("old","claude","completed")]);
+  view.terminalRunSelections.set("t:claude","old");
+  view.terminalTiledTasks.add("t");
+  const started = task([...old.runs,run("next"),run("parallel","codex")]);
+  view.followStartedTerminals([old],[started]);
+  assert.equal(view.terminalRunSelections.get("t:claude"),"next");
+  assert.equal(view.terminalRunSelections.get("t:codex"),"parallel");
+  assert.equal(state.selectedTerminalAgents.get("t"),"codex");
+  assert.equal(state.selectedTaskId,"other");
+  assert.equal(state.selectedTaskPanels.get("t"),"overview");
+  assert.ok(view.terminalTiledTasks.has("t"));
+  view.terminalRunSelections.set("t:claude","old");
+  state.selectedTerminalAgents.set("t","claude");
+  view.followStartedTerminals([started],[structuredClone(started)]);
+  assert.equal(view.terminalRunSelections.get("t:claude"),"old");
+  assert.equal(state.selectedTerminalAgents.get("t"),"claude");
+  const finished = task(started.runs.map(r=>({...r,state:"completed"})));
+  view.followStartedTerminals([started],[finished]);
+  assert.equal(view.terminalRunSelections.get("t:claude"),"old");
+  const next = task([...finished.runs,run("newest")]);
+  view.followStartedTerminals([finished],[next]);
+  assert.equal(view.terminalRunSelections.get("t:claude"),"newest");
+  // Imported history and noninteractive legacy runs do not steal the view.
+  const historical = task([...next.runs,run("imported","codex","completed"),{...run("legacy","codex"),terminal:false}]);
+  view.followStartedTerminals([next],[historical]);
+  assert.equal(state.selectedTerminalAgents.get("t"),"claude");
+  view.followStartedTerminals([historical],[historical,task([run("background","antigravity")],"second")]);
+  assert.equal(state.selectedTaskId,"other");
+  assert.equal(view.terminalRunSelections.get("second:antigravity"),"background");
+});

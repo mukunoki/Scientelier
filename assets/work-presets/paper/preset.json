@@ -1,0 +1,31 @@
+{
+  "id": "paper",
+  "name": "論文執筆モード",
+  "description": "既存の研究成果・データ・文献を使い、論文の構成・本文・図表・引用の仕上げに専念します。新たな実装や実験は始めません。",
+  "focus": "paper",
+  "version": 1,
+  "rules": "rules.md",
+  "primaryDocument": "paper",
+  "goal": {
+    "deliverables": [
+      "指定形式の論文TeXソースとPDF"
+    ],
+    "criteria": [
+      {
+        "id": "argument",
+        "description": "論文の中心的な主張を根拠で支え、関連研究との差分・適用範囲・限界を明示する。",
+        "verification": "主張とデータ・引用の対応を確認し、結論の過剰な一般化や裏付けのない新規性の主張がないことを確認する。",
+        "required": true
+      },
+      {
+        "id": "paper_layout",
+        "description": "承認された投稿先・読者・体裁の条件に合う論文PDFを作成する。",
+        "verification": "論文PDFを表示し、ページ数、図表、引用、文字切れ、未解決参照を確認する。",
+        "required": true
+      }
+    ],
+    "questions": [
+      "想定読者・投稿先または形式・言語・ページ数・主張・提供できる研究成果とデータ・文献を確認してください。"
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+# Dependencies and compiled app bundles (recreated from source)
+node_modules/
+dist/
+*.tsbuildinfo
+*.app/
+.mac-app-build-*/
+
+# Local test output, caches and document build products
+output/
+tmp/
+*.aux
+*.dvi
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+.DS_Store
+*.log
+
+# Local runtime data and credentials must never enter source control
+.agent-harness-data/
+.agent-harness/
+.npmrc
+.mcp.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+auth.json
+credentials.json
+tasks.json
+resource-state.json
+remote-systems/
+opencode.json
+opencode.jsonc
+.claude/
+.codex/
+.aws/
+.ssh/
+.opencode/
+.gemini/
+.antigravity/
+.ollama/
+.scientelier-data/
+.scientelier/
+release/
+reports/
+experiments/
+data/
+logs/
+settings.local.*
+*.sqlite
+*.sqlite3
+*.db
+*.pdf
+*.csv
+*.parquet
+PUBLIC_SOURCE_MANIFEST.json
+
+# Legacy UI snapshots and unrelated experiment workspaces remain on disk.
+# They are not dependencies of the current Scientelier source.
+editions/
+改良版を起動.command
+GEMMul16/
+sdot/

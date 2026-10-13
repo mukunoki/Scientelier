@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self' file:; object-src 'self' file:;" />
+    <title>Scientelier</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../../node_modules/@xterm/xterm/css/xterm.css" />
+    <script src="../../node_modules/@xterm/xterm/lib/xterm.js" defer></script>
+    <script src="../../node_modules/@xterm/addon-fit/lib/addon-fit.js" defer></script>
+    <script src="../../dist/renderer/terminals.js" defer></script>
+    <script src="../../dist/renderer/terminal-logs.js" defer></script>
+    <script src="../../dist/renderer/reports.js" defer></script>
+    <script src="../../dist/renderer/task-state.js" defer></script>
+    <script src="../../dist/renderer/display-text.js" defer></script>
+    <script src="../../dist/renderer/task-history.js" defer></script>
+    <script src="../../dist/renderer/work-outcome.js" defer></script>
+    <script src="../../dist/renderer/goals.js" defer></script>
+    <script src="../../dist/renderer/settings-slider.js" defer></script>
+    <script src="../../dist/renderer/execution.js" defer></script>
+    <script src="../../dist/renderer/workflow-graph.js" defer></script>
+    <script src="../../dist/renderer/instruction-document.js" defer></script>
+    <script src="../../dist/renderer/scope-change.js" defer></script>
+    <script src="../../dist/renderer/presets.js" defer></script>
+    <script src="../../dist/renderer/lesson.js" defer></script>
+    <script src="../../dist/renderer/settings-layout.js" defer></script>
+    <script src="../../dist/renderer/remote.js" defer></script>
+    <script src="../../dist/renderer/finishing.js" defer></script>
+    <script src="../../dist/renderer/skills.js" defer></script>
+    <script src="../../dist/renderer/cli-login.js" defer></script>
+    <script src="../../dist/renderer/services.js" defer></script>
+    <script src="../../dist/renderer/models.js" defer></script>
+    <script src="../../dist/renderer/benchmarks.js" defer></script>
+    <script src="../../dist/renderer/hpc.js" defer></script>
+    <script src="../../dist/renderer/research.js" defer></script>
+    <script src="../../dist/renderer/quality.js" defer></script>
+    <script src="../../dist/renderer/task-progress.js" defer></script>
+    <script src="../../dist/renderer/index.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">Sc</div>
+          <div>
+            <div class="brand-name">Scientelier</div>
+            <div class="brand-subtitle">複数AIによる研究開発</div>
+          </div>
+        </div>
+
+        <nav aria-label="Primary navigation">
+          <button id="nav-dispatch" class="nav-item" type="button"><span>＋</span> 新しいタスク</button>
+          <button id="nav-tasks" class="nav-item active" type="button"><span>⌘</span> タスク</button>
+          <button id="nav-usage" class="nav-item" type="button"><span>◔</span> サービス</button>
+          <button id="nav-settings" class="nav-item" type="button"><span>⚙</span> システム設定</button>
+        </nav>
+
+        <section class="sidebar-tasks" aria-labelledby="tasks-heading">
+          <div class="sidebar-tasks-heading"><h2 id="tasks-heading">タスク</h2><span id="task-count" class="count-badge">0</span></div>
+          <div id="task-list" class="task-tabs" role="tablist" aria-orientation="vertical" aria-label="Tasks"></div>
+        </section>
+
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Scientelier</p>
+            <h1 id="page-title">タスク</h1>
+          </div>
+          <div class="topbar-actions">
+            <div id="queue-indicator" class="queue-indicator"><span></span><strong>Queue idle</strong></div>
+          </div>
+        </header>
+
+        <div id="dispatch-view" class="view hidden">
+          <section class="panel dispatch-panel" aria-labelledby="dispatch-heading">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="dispatch-heading">タスクを依頼</h2>
+                </div>
+              </div>
+              <form id="task-form">
+                <section class="workspace-choice" aria-label="作業場所を指定">
+                  <h3>1. 作業場所を指定</h3>
+                  <label>実行環境
+                    <select id="task-remote" aria-label="実行環境"><option value="">このMac</option></select>
+                  </label>
+                  <p id="task-remote-note"></p>
+                  <div id="task-local-directory">
+                    <label>ディレクトリの選択方法
+                      <select id="task-workspace-mode" required><option value="existing">既存ディレクトリを使う</option><option value="new">新規ディレクトリを作成</option></select>
+                    </label>
+                    <label>作業ディレクトリ<input id="task-cwd" name="cwd" required placeholder="絶対パスを入力、または選択…" /></label>
+                    <button type="button" id="choose-workspace" class="secondary-button">既存フォルダを選択…</button>
+                    <p>ローカルCodexはFull accessが標準です（作業フォルダ外も操作可能）。作成後、実行前にタスクの権限設定で変更できます。</p>
+                  </div>
+                  <p>別タスクと同時に実行する場合は、重ならない作業ディレクトリを指定してください。SSH接続先はシステム設定で登録できます。</p>
+                  <p id="workspace-choice-status" role="status">入力順は自由です。作業場所はタスク作成時に確認します。</p>
+                </section>
+                <fieldset id="task-details">
+                  <legend>2. ゴールと担当を設定</legend>
+                <label>
+                  作業モード
+                  <select id="task-preset" name="presetId" aria-label="作業モード"></select>
+                </label>
+                <p id="task-preset-description"></p>
+                <section id="lesson-dispatch" class="lesson-panel hidden" aria-label="論文と読者の設定">
+                  <h3>論文と、理解したいこと</h3>
+                  <p>主論文を先頭に、補足PDFを追加できます。原本は変更せず作業場所へコピーします。遠隔タスクでは選択した接続先へ転送します。</p>
+                  <button id="lesson-choose-pdfs" type="button" class="secondary-button">論文PDFを追加…</button>
+                  <ol id="lesson-pdf-list"></ol>
+                  <label>参考URL（Gitリポジトリ・補足資料など、1行1件）<textarea id="lesson-references" rows="2" placeholder="https://github.com/…"></textarea></label>
+                  <label>想定読者・知っていること<input id="lesson-audience" maxlength="2000" value="分野外の研究者。必要な背景・前提知識から説明してほしい" /></label>
+                  <label>特に理解したいこと<input id="lesson-interests" maxlength="2000" placeholder="例：数式の意味、実装の流れ、実験結果の読み方" /></label>
+                  <label>教材の言語<select id="lesson-language"><option value="ja">日本語</option><option value="en">English</option></select></label>
+                  <p>AIが論文を読んで説明の開始点を提案します。次の画面で項目ごとに選択してから制作します。読むためのBeamer教材：100ページ以上も可・枚数上限なし。</p>
+                </section>
+                <label>
+                  タイトル
+                  <input id="task-title" name="title" required placeholder="例：既存コードの実装・性能改善" />
+                </label>
+                <label>
+                  達成したいこと
+                  <textarea id="task-prompt" name="prompt" required rows="5" placeholder="最終的に何を得たいか、守る条件、入力資料などを記入してください。"></textarea>
+                </label>
+                <label>作業時間の目安（分・任意）
+                  <input id="task-target-minutes" type="number" min="1" max="10080" step="1" placeholder="例：60（空欄は未指定）" aria-describedby="task-target-minutes-help" />
+                </label>
+                <p id="task-target-minutes-help">PDF・レビューを含む本作業全体の目安です。超過しても強制終了しません。</p>
+                <label>
+                  作業の重点
+                  <select id="task-strategy" name="strategy">
+                    <option value="balanced">標準</option>
+                    <option value="quality">内容の品質を重視</option>
+                    <option value="quota-saver">使用枠を節約</option>
+                  </select>
+                </label>
+                <p id="dispatch-execution-note" role="status"></p>
+                <fieldset class="agent-pool-fieldset">
+                  <legend>利用するAI（モデルはサービス設定に従う）</legend>
+                  <div id="task-agent-pool" class="task-agent-pool"></div>
+                </fieldset>
+                <p id="form-error" class="form-error" role="alert"></p>
+                <p>まずゴールと達成条件を整理します。承認するまで本作業は開始しません。</p>
+                <div class="goal-actions">
+                  <button class="primary-button" type="submit" value="ai">AIでゴール案を作成</button>
+                  <button class="secondary-button" type="submit" value="manual">自分でゴールを設定</button>
+                </div>
+                </fieldset>
+              </form>
+              <section class="dispatch-agents" aria-labelledby="cli-heading">
+                <div class="dispatch-subheading">
+                  <div>
+                    <h3 id="cli-heading">検出されたCLI</h3>
+                    <p>実行環境・ログイン・使用枠は「サービス」で確認できます。</p>
+                  </div>
+                  <button id="refresh-agents" class="secondary-button compact" type="button">検出を更新</button>
+                </div>
+                <div id="agent-grid" class="agent-grid" aria-live="polite"></div>
+              </section>
+          </section>
+        </div>
+
+        <div id="tasks-view" class="view">
+            <section class="task-workspace" aria-labelledby="tasks-heading">
+              <div class="task-tabs-heading">
+                <div class="task-workspace-actions">
+                  <button id="start-queue" class="primary-button compact" type="button">待機タスクを実行</button>
+                  <button id="stop-queue" class="danger-button compact" type="button" disabled>現在の作業後に停止</button>
+                </div>
+              </div>
+              <section id="task-detail" class="panel detail-panel empty">
+                <div class="empty-state">
+                  <div class="empty-icon">›_</div>
+                  <h2>タスクを選んでください</h2>
+                  <p>左の「新しいタスク」から作業を依頼できます。</p>
+                </div>
+              </section>
+
+            </section>
+        </div>
+
+        <div id="settings-view" class="view hidden">
+          <section class="settings-category" id="settings-models">
+            <h2>利用するサービス<span>使用枠・リセット日時・切替目安</span></h2>
+            <section class="panel">
+              <p>モデルはCLIの既定値を利用できます。変更は次の工程から適用し、実行中の端末は変更しません。</p>
+              <form id="model-default-form"><div id="model-default-list"></div></form>
+              <form id="glm-form">
+                <div class="service-heading"><h3>OpenCode</h3><div id="opencode-enabled"></div></div>
+                <div id="opencode-login-actions" class="detail-actions"></div>
+                <div data-service-status="opencode"></div>
+                <p>OpenCodeはここだけで接続先とモデルを一緒に保存します。切替前にタスクを停止し、OpenCodeのエージェント端末を終了してください。選択だけでは実行設定は変わりません。</p>
+                <label>接続先<select id="opencode-provider"><option value="zai">Z.AI · GLM Coding Plan</option><option value="ollama">Ollama Cloud（APIキーで直接接続）</option><option value="ollama-app">Ollama経由のCloud（Ollamaのログインを利用）</option></select></label>
+                <button type="button" id="opencode-deepseek" class="secondary-button compact">DeepSeek V4.1 Flashを選択（Ollama経由）</button>
+                <p id="opencode-plan-note">接続先を選び、OpenCodeログイン管理でそのサービスのAPIキーを登録してください。選択だけでは保存されません。「OpenCodeに適用」で切り替えます。</p>
+                <button id="opencode-selected-login" type="button" class="secondary-button compact">選択中の接続先のログインを確認</button>
+                <label>モデル<input id="glm-model" list="glm-models" placeholder="zai-coding-plan/glm-…" required autocomplete="off"></label>
+                <datalist id="glm-models"></datalist>
+                <div class="detail-actions"><button type="button" id="glm-load-models" class="secondary-button compact">モデル一覧を取得</button><button type="submit" class="primary-button compact">OpenCodeに適用</button></div>
+                <p id="glm-status" role="status"></p>
+                <p>OpenCodeの接続先は一度に1サービスです。接続先ごとの前回モデルと認証は保持します。同時にZ.AIとOllamaを別担当として使う構成には未対応です。SSH先では、そのマシンにもOpenCodeと認証が必要です。</p>
+              </form>
+              <p class="service-save-note">利用するAI・既定モデル・切替目安はまとめて保存します。OpenCodeの接続先変更だけは、下の「OpenCodeに適用」で確定します。</p>
+              <button id="save-model-defaults" form="model-default-form" type="submit" class="primary-button">サービス設定を保存</button><p id="model-default-status" role="status"></p>
+            </section>
+          </section>
+          <details class="settings-section" id="settings-login">
+            <summary>モデル・認証・使用量について</summary>
+            <section class="panel work-common-panel">
+              <p>モデルの優先順：担当別 → タスク別 → Resourcesの設定 → CLI既定。候補はこのMacのCLIから取得します。契約内での利用を保証するものではありません。</p>
+              <p>ログイン管理はこのMacの認証を確認します。OpenCodeは保存済み接続先が対象です。変更前の接続先の認証は「選択中の接続先のログインを確認」を使います。SSH先の認証は別です。</p>
+              <details class="settings-help"><summary>使用量はどこから取得する？</summary>
+                <p>Codex・ClaudeはCLI認証、Antigravityは公式CLIのUsage連携、Ollamaは専用Webログインを使います。CLIへのログインと使用量取得の成功は別です。残量・観測時刻・エラーは右サイドバーとResourcesで確認できます。</p>
+                <p>Antigravityは未設定のときだけ、ログイン管理画面に「使用量表示を設定」が表示されます。最新値はCLIの /usage で取得し、「状態を更新」で記録済みの値を読み直します。SSH先の認証・使用量とは別です。</p>
+              </details>
+            </section>
+          </details>
+          <section id="settings-routing"></section>
+          <details class="settings-section" id="settings-remote">
+          <summary>遠隔システム（SSH）<span>接続先・作業フォルダ・システムの利用手順</span></summary>
+          <section class="panel remote-panel" aria-labelledby="remote-heading">
+            <h2 id="remote-heading">遠隔システム（SSH）</h2>
+            <p>CLIは選択した遠隔マシンで動作します。追加SSHには「手動で接続を準備」を使います。最終マシンにNode.js 18以上、各CLIとLLMへの外部通信許可が必要です。tmuxがあればCLIを保持し、SSH切断後も同じ工程へ再接続できます。再認証は手動です。施設の常駐・ログインノード利用規則を確認してください。</p>
+            <label>接続先<select id="remote-select" aria-label="登録した遠隔システム"><option value="">新しく登録</option></select></label>
+            <form id="remote-form">
+              <label>接続方式<select id="remote-mode" aria-label="遠隔接続方式"><option value="prepared">手動で接続を準備（追加SSHに対応）</option><option value="direct">接続先で直接CLIを実行（従来方式）</option></select></label>
+              <label>遠隔端末の保持<select id="remote-terminal-backend"><option value="auto">tmuxを優先（未導入なら直接端末）</option><option value="tmux">tmuxを必須にする</option><option value="direct">直接端末（切断時の保持なし）</option></select></label>
+              <p id="remote-mode-note">接続用ターミナルで追加SSH・認証・環境設定・cdを済ませ、「ここを作業環境として確定」を押します。Node.js・Python 3・CLIが必要なのは最終マシンだけです。確定後は接続を連携専用に使い、CLIはタスク内の別ターミナルで操作します。</p>
+              <label>遠隔Codexの起動権限<select id="remote-codex-permissions" aria-label="遠隔Codexの起動権限"><option value="full-access">Full access（新規の標準・サンドボックスなし）</option><option value="sandbox">工程別サンドボックスを使用（Linuxではbwrap）</option></select></label>
+              <p>新規登録はbwrapを使わないFull accessが標準です。既存設定は保持します。今後作るタスクに適用し、既存タスクは「遠隔Codexの権限…」から承認前でも個別に変更できます。Full accessでは承認要求と隔離保護がなく、読み取り担当も作業フォルダ外へ書き込めます。保存時に確認します。他のCLI・ローカル実行は変更しません。</p>
+              <div class="settings-grid">
+                <label>表示名<input id="remote-name" required placeholder="研究用スパコン" /></label>
+                <label>接続先（IPアドレス／サーバ名）<input id="remote-host" required placeholder="例：192.0.2.10 または login.example.jp" /></label>
+                <label>ログインユーザ名<input id="remote-user" placeholder="例：yourname（SSH設定を使う場合は省略可）" autocomplete="off" /></label>
+                <label>SSHポート（通常は空欄）<input id="remote-port" type="number" min="1" max="65535" placeholder="22（SSH設定があればその値）" /></label>
+              </div>
+              <p>IPアドレスを直接入力できます。SSH configへの登録は不要です。登録済みのHost名も使えます。ユーザ名が空欄の場合はSSH設定、指定がなければMacのユーザ名を使います。</p>
+              <label id="remote-update-address-label" class="remote-address-toggle" hidden><input id="remote-update-task-address" type="checkbox" />同じマシンのIP・サーバ名変更を既存タスクにも反映</label>
+              <p id="remote-address-note" hidden>ゴール・作業フォルダ・ログインユーザ・権限・成果・履歴は保持します。実行中は一時停止してください。保持中の遠隔CLIは新しいIPへ再接続後に確認し、確認前に別の担当は起動しません。</p>
+              <div id="remote-direct-folder"><label>作業フォルダ（ログイン先のホーム基準）<input id="remote-cwd" value="agent-harness" placeholder="例：projects/test または ~/projects/test" /></label>
+              <p>projects/test → ログイン先のホーム/projects/test。認証後の「環境確認」で、なければ新しく作成します。空欄は ~/agent-harness。既存の共有領域などは /work/project のような絶対パスでも指定できます。</p>
+              </div>
+              <section id="remote-advanced" class="settings-inline">
+                <h3>詳細設定（通常は変更不要）</h3>
+                <div class="settings-grid">
+                  <label>管理用ID（空欄で自動作成）<input id="remote-id" placeholder="自動作成" /></label>
+                  <label>Node.jsの実行コマンド<input id="remote-node" required value="node" /></label>
+                  <label>Python 3の実行コマンド（手動準備方式）<input id="remote-python" value="python3" /></label>
+                  <label>遠隔生成時のTeXコマンド<input id="remote-tex" required value="latexmk" /></label>
+                </div>
+                <p>Nodeは「計算ノード」ではなく、連携用プログラムを動かすNode.jsです。遠隔側にNode.js 18以上が必要です。通常は node のままにし、別の場所にある場合だけ /path/to/node を指定します。</p>
+                <p>遠隔TeXコマンドは、この接続先でレポートを生成する場合に使用します。Macで生成する場合は「TeX・PDF・作図環境」のコマンドを使います。</p>
+                <label>起動時の環境設定（直接実行方式のみ。手動準備方式ではターミナルで実行）<textarea id="remote-startup" rows="2" spellcheck="false" placeholder="例：module load nodejs"></textarea></label>
+              </section>
+              <label>システムの利用手順（プレーンテキスト）<textarea id="remote-instructions" rows="9" spellcheck="false" placeholder="ログインノードで許可される作業、環境設定、ジョブ投入・状態確認・取消のコマンドと例、キュー名、課金アカウント、計算資源の上限、出力の場所、情報持ち出しのルールを記載"></textarea></label>
+              <p>手順は接続先ごとの .txt に保存します。パスワード・秘密鍵・アクセストークンは記載しないでください。既存タスクは作成時の手順を保持します。</p>
+              <button class="primary-button" type="submit">接続先を保存</button>
+            </form>
+            <div class="goal-actions">
+              <button id="remote-dispatch" class="primary-button" type="button">Resourcesで接続・CLIを管理</button>
+            </div>
+            <p id="remote-status" role="status"></p>
+            <p id="remote-error" class="form-error" role="alert"></p>
+          </section>
+          </details>
+          <details class="settings-section" id="settings-execution">
+            <summary>実行の基本設定<span>新規タスクの方針・並列数・レビュー・予算</span></summary>
+            <section class="panel execution-settings-panel" aria-label="実行戦略の設定">
+              <p>新規タスクの既定値です。既存タスクは上部の「実行戦略…」から変更できます。ゴール承認前は確認画面内で設定します。</p>
+              <div id="execution-settings-editor"></div>
+            </section>
+          </details>
+          <section class="settings-category" id="settings-writing">
+          <h3 id="finishing-heading">レポート執筆ルール</h3>
+          <section class="panel finishing-panel" aria-labelledby="finishing-heading">
+            <p>全媒体に「共通ルール」「表現・文体」「数値・文献の検証」と、該当する媒体のルールを適用します。AIらしい表現を避ける指示と既存の言い換え例は「表現・文体」にまとめました。各項目をクリックして編集できます。</p>
+            <p>保存した変更は、次に開始する執筆担当・レポーターから適用されます。実行中の指示や完成済み文書は変更しません。過去の版を指定した担当・独立レビューは、その固定版を使います。読むだけの相談・レビューでは文書を変更しません。</p>
+            <p>各欄はそれぞれ1つのルールです。保存・再読み込み・同梱ルールへの復元は、操作した欄だけに適用され、他の欄の未保存入力は保持します。</p>
+            <div id="writing-rule-sections">
+            <details class="writing-rule-section"><summary>共通ルール</summary>
+            <div id="writing-editor-common" class="writing-rule-editor">
+            <label>共通の執筆ルール（SKILL.md）<textarea id="finishing-rules" rows="12" spellcheck="false" aria-label="レポート執筆ルールの指示" disabled></textarea></label>
+            <div class="goal-actions"><button id="finishing-save" class="primary-button" type="button" disabled>執筆ルールを保存</button><button id="finishing-default" class="secondary-button compact" type="button" disabled>同梱ルールを編集欄に戻す</button><button id="finishing-reload" class="secondary-button compact" type="button">再読み込み</button></div>
+            <p id="finishing-status" role="status"></p><p id="finishing-path"></p><p id="finishing-error" class="form-error" role="alert"></p>
+            </div></details>
+            </div>
+          </section>
+          </section>
+          <details class="settings-section" id="settings-permissions">
+          <summary>操作権限と安全性（説明）<span>自動承認の対象・注意事項。設定を変更する欄ではありません</span></summary>
+          <section class="panel" aria-label="CLIの操作権限">
+            <h2>CLIの操作権限</h2>
+            <p>Antigravity CLIはタスク実行時に操作承認を省略します（dangerously-skip-permissions）。Claude Codeも操作承認を省略します（bypassPermissions）。ローカル・遠隔ともファイル変更やコマンド実行が確認なしで行われます。読み取り担当の制限は指示によるもので、OSのサンドボックスではありません。専用の作業環境を推奨します。ログイン管理では自動承認しません。</p>
+            <p>両CLIの起動時のフォルダ信頼確認は、指定した起動フォルダと表示パスが完全に一致する場合のみ自動承認します。長いパスは端末を一時的に広げて再確認し、確認後は元のサイズに戻します。フォルダ内の設定やフックも信頼対象となります。ホームを指定した場合はホーム全体が対象です。Codexは起動フォルダだけを信頼済みとして指定します。CLIの共有設定・認証ファイルを直接書き換えません。</p>
+            <p>別フォルダ・未対応形式の確認、ログイン、組織側の制限には自動回答しません。手動でキーを入力すると、その起動での自動承認を停止します。起動済みのCLIには遡及しません。</p>
+          </section>
+          </details>
+          <details class="settings-section" id="settings-presets">
+          <summary id="presets-heading">モード別の進め方<span>各モード固有の目的・計画・作業・検証・報告内容</span></summary>
+          <section class="panel preset-panel" aria-labelledby="presets-heading">
+            <button id="presets-refresh" class="secondary-button compact" type="button">再読み込み</button>
+            <p>通常は変更不要です。タスク作成時にモードを選ぶだけで、その進め方が適用されます。個別の成果物・達成条件は、タスクのゴールで指定します。</p>
+            <label>モード<select id="preset-manager-select" aria-label="確認するモード"></select></label>
+            <p id="preset-manager-description"></p>
+            <p id="preset-status" role="status"></p>
+            <button id="preset-edit" class="secondary-button compact" type="button" aria-expanded="false" aria-controls="preset-raw-editor">ルール全文を確認・編集</button>
+            <section id="preset-raw-editor" class="settings-inline" hidden>
+              <p>変更が必要な場合だけ編集してください。保存後に作るタスクから適用され、既存タスクは変わりません。共通の原則や文章表現は、左の専用タブで設定します。</p>
+              <label>モード固有のルール<textarea id="preset-rules" rows="16" spellcheck="false" aria-label="プリセットの作業ルール"></textarea></label>
+              <div class="goal-actions"><button id="preset-save" class="primary-button" type="button">ルールを保存</button><button id="preset-revert" class="secondary-button compact" type="button">編集を破棄</button></div>
+              <p id="preset-directory"></p>
+            </section>
+            <p id="preset-error" class="form-error" role="alert"></p>
+          </section>
+          </details>
+          <details class="settings-section" id="settings-work-common">
+            <summary>共通の作業ルール<span>全モードで一度だけ設定する原則・記録・自律動作の方針</span></summary>
+            <section class="panel work-common-panel">
+              <p>研究・アイディア・関連研究調査・実装・論文・ポスターの全プリセットで使います。レポートの文章表現は「レポート執筆ルール」で設定します。編集してもアプリ側の権限・承認・レビューの必須条件は変わりません。保存後に作るタスクから適用します。</p>
+              <label>共通の作業原則<textarea id="work-common-rules" rows="10" maxlength="8000" aria-label="全モード共通の作業原則" disabled></textarea></label>
+              <div class="goal-actions"><button id="work-common-save" type="button" class="primary-button" disabled>共通の原則を保存</button><button id="work-common-reload" type="button" class="secondary-button">再読み込み</button></div>
+              <p id="work-common-status" role="status"></p><p id="work-common-path"></p><p id="work-common-error" class="form-error" role="alert"></p>
+            </section>
+          </details>
+          <details class="settings-section" id="settings-report">
+          <summary>TeX・PDF・作図環境<span>生成場所・実行コマンド・保存先</span></summary>
+              <section class="panel report-settings-panel" aria-label="Report environment">
+                <div class="panel-heading">
+                  <span>
+                    <strong>TeX・PDF・作図環境</strong>
+                  </span>
+                  <span class="step-badge">IPSJ preset included</span>
+                </div>
+                <div class="panel-heading report-settings-heading">
+                  <p>標準の報告書には情報処理学会の研究報告テンプレートを使用します。</p>
+                  <button id="check-report-tools" class="secondary-button compact" type="button">このMacの環境を確認</button>
+                </div>
+                <div id="environment-status" class="environment-status"></div>
+                <form id="report-settings-form" class="settings-form">
+                  <p>TeX・PDFはタスクの作業場所で生成します。遠隔タスクはSSH接続先、ローカルタスクはこのMacです。遠隔のTeXコマンド・環境の準備手順は「遠隔システム」で設定してください。生成済みPDFはこのMacへ取得してプレビューします。</p>
+                  <label>
+                    TeXビルドコマンド（このMac）
+                    <input id="tex-command" required />
+                  </label>
+                  <label>
+                    TeXの引数 <small>1行に1つ</small>
+                    <textarea id="tex-args" rows="4"></textarea>
+                  </label>
+                  <label>
+                    作図コマンド
+                    <input id="plot-command" required />
+                  </label>
+                  <label>
+                    作図環境の確認用引数 <small>1行に1つ</small>
+                    <textarea id="plot-check-args" rows="2"></textarea>
+                  </label>
+                  <label>
+                    レポートの保存先（このMac・遠隔PDFのプレビュー用コピー）
+                    <input id="report-output-directory" required />
+                  </label>
+                  <p id="settings-error" class="form-error" role="alert"></p>
+                  <button class="primary-button" type="submit">保存して環境を確認</button>
+                </form>
+              </section>
+          </details>
+        </div>
+
+        <div id="usage-view" class="view hidden">
+          <section aria-labelledby="resources-heading">
+            <div class="section-heading">
+              <div>
+                <h2 id="resources-heading">レートリミット・使用枠</h2>
+                <p>使用率・残量・リセット日時を確認できます。「更新」で状態も確認します。使用枠は契約アカウントに紐づきますが、ログイン先が異なる可能性があるため取得元ごとに表示し、合算しません。</p>
+              </div>
+              <div class="detail-actions">
+                <button id="refresh-capacity" class="secondary-button compact" type="button">状態・使用枠を更新</button>
+              </div>
+            </div>
+            <div class="service-environment-bar"><label>作業環境<select id="service-environment" aria-label="Resourcesの作業環境"><option value="">すべての環境</option></select></label><button id="service-environment-settings" class="secondary-button compact" type="button">接続先を登録・編集</button></div>
+            <div id="resource-grid" class="resource-grid"></div>
+          </section>
+
+          <section class="panel policy-panel" aria-label="サービス設定の保存">
+            <form id="orchestration-settings-form" class="policy-form">
+              <div class="threshold-row" hidden>
+                <label>
+                  使用量の警告目安
+                  <input id="warning-percent" type="number" min="1" max="100" />
+                </label>
+                <label>
+                  上限の何％まで使うか（切替目安）
+                  <input id="drain-percent" type="number" min="1" max="100" />
+                </label>
+                <p>全サービス共通の目安です。契約上限を100％として、この割合に達したら別サービスへの割当てを優先します。実行中の工程を強制終了せず、厳密な使用上限を保証するものではありません。</p>
+              </div>
+              <div id="agent-policy-list" hidden></div>
+              <p>各サービスの「利用する」の下で、契約上限の何％まで使うかを指定します。セッション・週など、選択モデルに関係する取得済みの使用率で判断します。使用率が未取得なら判定できず、トークン数からは推測しません。同じ契約を複数CLIで共有する場合は低い目安を採用します。</p>
+              <p>目安に達したら別サービスへの割当てを優先します。実行中の作業は強制終了しません。代替がない場合や担当を固定した場合は超えることがあるため、厳密な使用制限ではありません。保存時に旧トークン数指定を置き換えます。</p>
+              <p id="policy-error" class="form-error" role="alert"></p>
+              <div class="detail-actions"><button id="save-routing-settings" class="primary-button" type="submit">使用率の設定を保存</button><button id="routing-revert" class="secondary-button" type="button">保存済みの使用率に戻す</button></div>
+            </form>
+          </section>
+        </div>
+
+      </main>
+      <aside class="resource-sidebar" aria-label="利用量ステータス">
+        <div id="resource-summary" class="resource-summary sidebar-resource-summary" aria-label="Resource usage"></div>
+      </aside>
+    </div>
+    <dialog id="remote-task-auth-dialog" class="remote-task-auth-dialog" aria-labelledby="remote-task-auth-title">
+      <h2 id="remote-task-auth-title">作業開始前のSSH認証</h2>
+      <p id="remote-task-auth-target"></p>
+      <p id="remote-task-auth-instructions">下の端末でSSHのパスワード・多要素認証・初回ホスト鍵確認を行ってください。パスワードは通常、入力しても表示されません。アプリの設定には保存しません。</p>
+      <p id="remote-task-auth-next">認証後に「環境確認して続行」を押してください。接続済みの場合は再入力不要です。フォルダがなければ作成し、その後にCLIを起動します。</p>
+      <div id="remote-task-auth-terminal" style="height:300px; min-width:0" aria-label="作業開始時のSSH認証ターミナル"></div>
+      <p id="remote-task-auth-status" role="status"></p>
+      <p id="remote-task-auth-error" class="form-error" role="alert"></p>
+      <div class="goal-actions">
+        <button id="remote-task-auth-continue" class="primary-button" type="button">環境確認して続行</button>
+        <button id="remote-task-auth-retry" class="secondary-button" type="button">接続を再試行</button>
+        <button id="remote-task-auth-cancel" class="secondary-button" type="button">取り消す（タスクは保持）</button>
+      </div>
+    </dialog>
+    <dialog id="resource-usage-dialog" class="resource-usage-dialog" aria-labelledby="resource-usage-dialog-title">
+      <div class="resource-usage-dialog-card">
+        <header class="resource-usage-dialog-heading">
+          <div>
+            <p class="eyebrow">使用枠</p>
+            <h2 id="resource-usage-dialog-title">レートリミット</h2>
+          </div>
+          <button id="close-resource-usage" class="secondary-button compact" type="button">閉じる</button>
+        </header>
+        <div id="resource-usage-dialog-body" class="resource-usage-dialog-body"></div>
+      </div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

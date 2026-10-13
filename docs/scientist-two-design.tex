@@ -1,0 +1,73 @@
+% Build from repository root, using the bundled IPSJ technical-report template:
+% TEXINPUTS=assets/ipsj-tech-report/runtime: platex -interaction=nonstopmode -halt-on-error -output-directory=tmp/pdfs docs/scientist-two-design.tex
+% Repeat platex; dvipdfmx -o output/pdf/scientist-two-design.pdf tmp/pdfs/scientist-two-design.dvi
+\documentclass[submit,techrep,noauthor]{ipsj}
+\usepackage{url}
+\setcounter{年数}{2026}
+\title{ScientistTwoと関連研究に基づく\\Agent Harnessの証拠付き研究反復の設計}
+\begin{document}
+\begin{abstract}
+自律研究では，もっともらしい完了報告と，実験で裏付けられた成果を区別する必要がある．本稿はScientistTwoと関連する一次文献を整理し，Agent Harnessに追加する候補・実験台帳，独立批評，段階移行の検査を説明する．既存の複数CLI制御，予算管理，執筆・レビュー機構を再利用し，新たな分散基盤は導入しない．追加機構は証拠ファイルと比較条件の整合を検査するが，実験の真正性や新規性を数学的に保証するものではない．本稿は設計・実装報告であり，論文と同等の研究能力を再現したという性能報告ではない．
+\end{abstract}
+\maketitle
+
+\section{対象と分析の観点}
+対象はScientistTwoの初版\cite{two}である．本稿では\emph{候補}を検証可能な研究仮説，\emph{証拠}を実行コード・評価器・測定値・実行記録などの保存ファイル，\emph{批評}を実験の妥当性に対する別CLIの検討と呼ぶ．批評は，最終原稿に対する独立レビューとは別の工程である．
+
+ScientistTwoは，先行研究の限界から仮説を作り，小規模評価で候補を絞り，全体評価と要素比較へ進め，査読・反論を通じて再実験する閉ループを提案する．成功だけでなく失敗の履歴も次の候補生成に利用する\cite{two}．着目したのはエージェント数ではなく，段階ごとの証拠と差し戻し条件である．同論文の自動査読による評価は，実際の学会採択を意味しない．本アプリでもAIの評点を研究成功の代理目標にしない．
+
+\section{関連研究と設計への示唆}
+ScientistOneは主張と証拠の連鎖を扱い，数値の再現，仕様違反，引用，記述とコードの一致を監査する\cite{one}．本実装では実験記録の証拠ハッシュと依存関係を持ち，証拠が変わった下流判定を無効にする．ただし，ハッシュはファイルの同一性であって，科学的事実の証明ではない．
+
+AI Scientist-v2は実験管理を伴う段階的な木探索と，図の視覚的な批評を導入する\cite{v2}．本実装では親候補IDと失敗履歴を保存し，既存プランナーに探索と有望案の改良の配分を考えさせる．木探索の選択則や専用VLMは移植していない．候補間の資源配分を後から検証できる状態を先に整備する．
+
+ScholarPeerは領域の文脈調査，比較対象の探索，証拠照合を伴う多面的な質疑を分ける\cite{peer}．本実装では独立批評に，比較対象の欠落，漏洩，不確実性，原典との整合を検査させる．全担当に原稿全体を繰り返し読ませるのではなく，対象実験と疑義を指定する．
+
+PaperOrchestraは未整理の研究材料から構成，図，文献，節執筆，修正を経て原稿を作る\cite{orchestra}．本アプリでは既存のTeX/PDF，文献検証，執筆ルールを維持し，数値・主張を実験記録へ結び付ける指示を追加する．論文固有の外部サービスや評点による原稿採否は導入しない．
+
+\section{実装した研究反復}
+\subsection{適用範囲と評価条件}
+更新後に作成する「研究モード」の主担当方式タスクで有効にする．アイディア，関連研究調査，実装，論文執筆の既存工程構成は維持する．旧タスクや専用のコーディング・調査モードに，新たな必須条件を遡及適用しない．ゴール作成中にも研究操作権限は渡さない．
+
+実験開始前に，主担当または計画担当が問い，指標，改善方向，絶対許容差，小規模評価で使う指標，評価器・データ分割などの固定ファイル，実験記録の上限を登録する．指標と比較基準を結果観測後に入れ替える操作は提供しない．誤った条件で始めた場合は，元の定義を復元するか，新しいタスクで条件を設計し直す．
+
+\subsection{候補と段階移行}
+候補には仮説，対象とする限界，新規性の根拠候補，反証条件，一次資料の位置を持たせる．派生案は親IDを指定し，既存候補を上書きしない．新規性の記述は仮説であり，引用URLの存在だけでは検証済みと扱わない．
+
+まず小規模・全体それぞれの基準実験を登録する．候補の小規模評価が事前の許容差内で全指標を維持し，少なくとも一つを改善したときだけ，数値上の前進と判定する．さらに別CLIの独立批評が合格して初めて全体評価を記録できる．全体評価では全指標を必須とし，欠落・余分な指標・有限でない値を拒否する．この規則は本アプリの保守的な比較規則であり，統計的有意差の検定ではない．
+
+主担当が採用できるのは，独立批評を通過した全体評価である．既存の最良候補を差し替えるには，それに対しても同じ非悪化・改善条件が必要となる．採用結果に紐付けた要素比較または機構の対照実験を実施し，別CLIが検査する．新しい採用結果には新しい比較の証拠を要求する．
+
+\subsection{独立性と差し戻し}
+主担当の実行計画に，実験担当へ依存する読取専用の批評担当を定義する．ルーティングはその祖先の実験担当が使用したCLIを除外する．批評操作は専用担当だけに許可し，主担当による自己合格や最終レビュワーによる途中判定の変更を拒否する．別CLIの利用は統計的な独立性の保証ではない．OpenCode等で同じ基盤モデルを使う場合の相関は，利用者とプランナーが考慮する必要がある．
+
+実装・執筆工程が完了を申告しても，必要な実験・批評・要素比較が欠ければ既存の再計画・修正ループへ返す．最終完了操作でも検査する．査読の追加指摘には，対応する主張，追加実験または原典・コードの検証，修正文を対応付ける．既存の独立レビューと反復上限を使い，専用の無制限なメタ査読ループは作らない．
+
+\subsection{否定的結果と予算}
+すべての登録候補に有効な実験と独立批評があり，採用可能な全体改善がないときは，主担当が理由を付けて否定的結果を総括できる．これは失敗・未確認事項を報告する経路であり，承認済みゴールの達成を意味しない．最終のゴール評価は別に行う．
+
+実験台帳は最大30候補，実験記録は事前設定した1〜100件とし，既存のトークン予算・反復上限と併用する．上限は記録の受付制限であり，OSやスケジューラによる計算時間の強制制限ではない．予算内に報告・レビューの余裕を残すよう計画指示を出す．
+
+\section{保存，遠隔実行，画面}
+状態は作業ディレクトリの\texttt{.agent-harness}以下にタスクID別で保存する．実験ごとに結果JSONと，コード・環境・コマンド・生ログの保存物を登録する．相対パスと通常ファイルを検査し，シンボリックリンクと管理領域への参照を拒否する．評価条件・証拠のハッシュを再検査し，変更は依存先へ伝播させる．書込みは排他ロックと一時ファイルの置換で行う．
+
+ローカルと遠隔で同じ研究エンジンを利用する．遠隔台帳をローカルの空台帳で代用せず，既存の持続SSH接続で照会する．Codex，Claude，OpenCodeには実行単位のMCP操作，MCPを使わない経路には同じ権限文脈付きのコマンドを提供する．実行終了後の古い操作は受け付けない．
+
+タスクの「候補・実験・証拠」タブで評価条件，派生候補，実験段階，数値判定，批評，証拠変更を確認できる．表示を更新すると証拠を再検査する．台帳ロックの復旧は停止中だけに限定し，同じホストで所有プロセスが終了したことを確認する．生きているプロセスを時間だけで強制終了しない．
+
+\section{検証境界と残る課題}
+自動テストは固定基準，指標欠落，悪化候補，自己批評の拒否，独立CLIへの割当て，証拠変更の伝播，否定的結果，予算上限，遠隔操作，終了済み実行の拒否，既存ワークフローとの結合を対象とする．画面テストでは専用タブの表示，スクロール，モデル文字列の安全な表示を確認する．合成データによるソフトウェア検査は，実研究や実機GPU性能の検証とは区別する．
+
+初版は数値比較できる実験研究を対象とする．理論証明だけのゴール，指標間のトレードオフを最適化する問題，評価条件の途中改訂には別設計が必要である．必要な実験は担当CLIが実行し，台帳自体は実験コマンドを起動しない．CLIがツール外で実行する計算を台帳が物理的に阻止するわけではない．同じファイルシステムへ書けるエージェントに対する改ざん耐性も保証しない．
+
+今後は小さな実研究で，旧方式と新方式の実行時間，トークン消費，無効実験数，再現率を比較する必要がある．一次文献の内容理解，実行コードと測定値の結び付き，リーク検出，統計的な妥当性は，引き続き独立レビューと分野固有の検証スクリプトで確認する．本実装は原論文の探索規則や評価ベンチマークを完全に再現したものではない．
+
+\clearpage
+\begin{thebibliography}{9}
+\bibitem{two} Jaehyun Nam, Jinsung Yoon, Yanzhou Pan, Yubo Wang, Rui Meng, Parthasarathy Ranganathan, Tomas Pfister: ScientistTwo: Pioneering the Human Knowledge Frontier with Autonomous AI, arXiv:2609.19644v1 (2026). \url{https://arxiv.org/abs/2609.19644v1}.
+\bibitem{one} Rui Meng, Bhavana Dalvi Mishra, Jiefeng Chen, Chun-Liang Li, Palash Goyal, Mihir Parmar, Yiwen Song, Yale Song, Rajarishi Sinha, Parthasarathy Ranganathan, Burak Gokturk, Jinsung Yoon, Tomas Pfister: ScientistOne: Towards Human-Level Autonomous Research via Chain-of-Evidence, arXiv:2605.26340v1 (2026). \url{https://arxiv.org/abs/2605.26340v1}.
+\bibitem{v2} Yutaro Yamada, Robert Tjarko Lange, Cong Lu, Shengran Hu, Chris Lu, Jakob Foerster, Jeff Clune, David Ha: The AI Scientist-v2: Workshop-Level Automated Scientific Discovery via Agentic Tree Search, arXiv:2504.08066v1 (2025). \url{https://arxiv.org/abs/2504.08066v1}.
+\bibitem{peer} Palash Goyal, Mihir Parmar, Yiwen Song, Hamid Palangi, Tomas Pfister, Jinsung Yoon: ScholarPeer: A Context-Aware Multi-Agent Framework for Automated Peer Review, arXiv:2601.22638v1 (2026). \url{https://arxiv.org/abs/2601.22638v1}.
+\bibitem{orchestra} Yiwen Song, Yale Song, Tomas Pfister, Jinsung Yoon: PaperOrchestra: A Multi-Agent Framework for Automated AI Research Paper Writing, arXiv:2604.05018v1 (2026). \url{https://arxiv.org/abs/2604.05018v1}.
+\end{thebibliography}
+\end{document}

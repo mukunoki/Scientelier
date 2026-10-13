@@ -1,0 +1,30 @@
+{
+  "id": "poster",
+  "name": "ポスター作成モード",
+  "description": "一つの中心メッセージを、図と読みやすい構成で伝えるポスターを作ります。",
+  "version": 1,
+  "rules": "rules.md",
+  "document": "poster",
+  "goal": {
+    "deliverables": [
+      "指定サイズのポスターTeXソースとPDF"
+    ],
+    "criteria": [
+      {
+        "id": "poster_message",
+        "description": "想定読者が中心メッセージとその根拠を短時間で理解できるポスターを構成する。",
+        "verification": "結論・主要な図・説明の対応と読む順序を確認し、情報過多や主張と根拠の不一致がないことを確認する。",
+        "required": true
+      },
+      {
+        "id": "poster_layout",
+        "description": "指定されたサイズ・向き・必須要素を満たすポスターPDFを作成する。",
+        "verification": "PDFのページ寸法、実寸相当の文字サイズ、図の解像度、はみ出し、余白、参照の解決を確認する。",
+        "required": true
+      }
+    ],
+    "questions": [
+      "掲示サイズ・縦横・対象読者・中心メッセージ・必須要素・使用可能な図や素材を確認してください。"
+    ]
+  }
+}

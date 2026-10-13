@@ -1,0 +1,18 @@
+{
+  "id": "paper-explainer",
+  "name": "論文解説モード",
+  "description": "論文を読み、背景・前提知識の説明レベルを提案。選んだ範囲から紙芝居型のBeamer自習教材を作ります。枚数・発表時間上限なし。",
+  "version": 1,
+  "rules": "rules.md",
+  "focus": "paper-explainer",
+  "primaryDocument": "beamer",
+  "goal": {
+    "deliverables": ["図の素材・生成手順と、説明箇所から原典を確認できる出典対応"],
+    "criteria": [
+      {"id":"reader-foundations","description":"指定した前提知識から主要な仕組みまで説明がつながる","verification":"独立した読者役がページ順に読み、未定義語・記号・説明の飛躍を指摘し、重大な指摘の修正を確認する","required":true},
+      {"id":"paper-fidelity","description":"背景・従来法・提案・結果・限界を原典に忠実に説明する","verification":"原論文・補足のページや節との対応を独立照合する。補足説明、比喩、説明用データと論文の実測を区別し、既存の文献二重照合規約を適用する","required":true},
+      {"id":"visual-teaching","description":"具体例・段階的な図解で口頭補足なしに理解できる","verification":"安定したフレームIDで絵コンテとPDFを対応付け、全ページの可読性、図の意味、途中計算、章の接続を確認する","required":true}
+    ],
+    "questions": []
+  }
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self' blob: data:; connect-src 'self'; object-src 'none'">
+  <title>PDFレポート</title>
+  <link rel="stylesheet" href="../../node_modules/pdfjs-dist/web/pdf_viewer.css">
+  <link rel="stylesheet" href="pdf-viewer.css">
+</head>
+<body>
+  <header>
+    <button id="toggle" aria-label="ページ一覧の表示切り替え" aria-expanded="true">ページ一覧</button>
+    <button id="previous" aria-label="前のページ">‹</button>
+    <label><input id="page" type="number" min="1" value="1" aria-label="ページ番号"> / <span id="total">–</span></label>
+    <button id="next" aria-label="次のページ">›</button>
+    <select id="zoom" aria-label="表示倍率">
+      <option value="page-width">幅に合わせる</option><option value="page-fit">全体表示</option>
+      <option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option>
+    </select>
+    <input id="search" type="search" placeholder="本文検索" aria-label="PDF内を検索">
+    <span id="matches" aria-live="polite"></span>
+    <button id="download" disabled>保存</button>
+  </header>
+  <main>
+    <aside id="sidebar" aria-label="PDFナビゲーション">
+      <nav><button id="pagesTab" aria-pressed="true">ページ</button><button id="outlineTab" aria-pressed="false">目次</button></nav>
+      <div id="thumbnails"></div><div id="outline" hidden></div>
+    </aside>
+    <div id="splitter" role="separator" tabindex="0" aria-label="ページ一覧の幅" aria-orientation="vertical" title="ドラッグで幅を調整・ダブルクリックで戻す"></div>
+    <section id="document"><div id="viewerContainer" tabindex="0"><div id="viewer" class="pdfViewer"></div></div></section>
+  </main>
+  <p id="status" role="status">PDFを読み込んでいます…</p>
+  <script type="module" src="pdf-viewer.mjs"></script>
+</body>
+</html>

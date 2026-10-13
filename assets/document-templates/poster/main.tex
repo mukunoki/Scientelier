@@ -1,0 +1,62 @@
+% Generic A0 portrait draft. Adapt dimensions/orientation to the approved goal.
+\documentclass{ltjsarticle}
+\usepackage[paperwidth=841mm,paperheight=1189mm,margin=38mm]{geometry}
+\usepackage{graphicx,booktabs,xcolor,tikz}
+\usepackage[hidelinks]{hyperref}
+\definecolor{accent}{HTML}{174C65}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{12mm}
+\newcommand{\paneltitle}[1]{{\color{accent}\fontsize{48}{60}\selectfont\bfseries #1}\par\vspace{5mm}}
+\begin{document}
+\fontsize{30}{44}\selectfont
+{\color{accent}\fontsize{76}{92}\selectfont\bfseries ポスタータイトル\par}
+{\fontsize{40}{54}\selectfont 最も伝えたいメッセージを一文で示す。\par}
+% Insert real author/affiliation information only when supplied.
+\vspace{15mm}
+{\color{accent}\rule{\linewidth}{2mm}}
+\vspace{18mm}
+\begin{minipage}[t][0.72\textheight][t]{0.46\linewidth}
+\raggedright
+\paneltitle{背景と問い}
+対象とする課題と、なぜ重要なのかを簡潔に説明する。\par
+\vspace{18mm}
+{\color{accent}\rule{\linewidth}{0.5mm}}\par
+読者が理解すべき背景を絞り、答えたい問いを明確にする。\par
+\vfill
+\paneltitle{方法}
+対象、手順、評価方法を図と短い説明で示す。\par
+\vspace{12mm}
+\begin{tikzpicture}[every node/.style={draw=accent,rounded corners,minimum width=90mm,minimum height=50mm,font=\fontsize{28}{36}\selectfont}]
+\node (a) at (0,0) {入力};
+\node (b) at (14,0) {分析};
+\draw[->,line width=2mm,accent] (a) -- (b);
+\end{tikzpicture}
+\par\vspace{18mm}
+図の要素は実際の手順に置き換え、再現に必要な条件を短く補足する。\par
+\vfill
+\paneltitle{根拠と条件}
+データの出典、評価条件、比較対象を示す。未実施の検証や未確認の数値を補わない。\par
+\end{minipage}\hfill
+\begin{minipage}[t][0.72\textheight][t]{0.46\linewidth}
+\raggedright
+\paneltitle{主要な結果}
+確認済みの結果を大きな図表で示す。\par
+\vspace{18mm}
+\begingroup\setlength{\fboxsep}{12mm}\color{accent}
+\fbox{\begin{minipage}[c][240mm][c]{0.9\linewidth}
+\centering\fontsize{40}{54}\selectfont 主図の配置領域\par
+\fontsize{28}{40}\selectfont 実際の成果に基づく図へ置き換える。\par
+\end{minipage}}\endgroup\par
+\vspace{12mm}
+図から読み取れることと、支持される結論を対応させる。\par
+\vfill
+\paneltitle{結論と限界}
+問いへの答え、根拠、適用範囲を短くまとめる。\par
+\vspace{18mm}
+不確実性や未解決の問いを明示し、中心的なメッセージを持ち帰れる構成にする。\par
+\end{minipage}
+\vfill
+{\color{accent}\rule{\linewidth}{1mm}}
+{\fontsize{24}{34}\selectfont 参考文献・連絡先：確認済みの情報のみを記載する。\par}
+\end{document}

@@ -1,0 +1,5 @@
+# Preserve upstream TeX distribution files verbatim, including CRLF.
+* text=auto
+assets/ipsj-tech-report/runtime/* -text -whitespace
+*.png binary
+*.zip binary

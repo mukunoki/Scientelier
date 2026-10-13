@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleDetection": "legacy",
+    "rootDir": "src/renderer",
+    "outDir": "dist/renderer",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo-renderer",
+    "lib": ["ES2022", "DOM"],
+    "types": []
+  },
+  "include": ["src/renderer/**/*.ts"]
+}

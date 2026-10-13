@@ -1,0 +1,47 @@
+{
+  "id": "research-project",
+  "name": "研究モード（標準）",
+  "description": "同じ主担当が着想・関連研究・実装評価・論文を統合し、必要な別AIへ委任して改善を反復します。",
+  "version": 1,
+  "rules": "rules.md",
+  "focus": "research",
+  "primaryDocument": "paper",
+  "integratedWorkflow": true,
+  "goal": {
+    "deliverables": [
+      "着想の比較・推奨する仮説と検証方針",
+      "出典付きの関連研究比較と提案の位置づけ",
+      "実装コード・再現手順・評価結果と証拠",
+      "研究結果をまとめた論文TeXソースとPDF"
+    ],
+    "criteria": [
+      {
+        "id": "idea",
+        "description": "着想の有用性・仮説・代替案・反証条件を明確にし、検証結果に応じて見直す。",
+        "verification": "推奨理由と棄却条件を照合し、後続の調査・評価が着想を支持するか否かを確認する。",
+        "required": true
+      },
+      {
+        "id": "sources",
+        "description": "関連研究を一次資料で確認し、提案との差分と限界を根拠付きで示す。",
+        "verification": "比較条件・引用箇所と新規性の主張を照合し、未確認事項を区別する。",
+        "required": true
+      },
+      {
+        "id": "behavior",
+        "description": "提案を実装し、再現可能な検証・評価で仮説を検討する。",
+        "verification": "コード・実行条件・結果を照合し、比較基準・異常系・再現性・適用限界を確認する。",
+        "required": true
+      },
+      {
+        "id": "argument",
+        "description": "実際の調査・実装・評価結果に基づく論文を執筆し、根拠と限界を明示する。",
+        "verification": "主張と実測結果・引用を照合し、全ページの図表・引用・体裁を確認する。否定的な結果を隠さず、未実施や成功を捏造しない。",
+        "required": true
+      }
+    ],
+    "questions": [
+      "研究課題・着想・対象範囲・利用できるコードやデータ・実行環境・評価方法・論文の読者と形式を確認してください。"
+    ]
+  }
+}

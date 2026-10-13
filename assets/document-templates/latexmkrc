@@ -1,0 +1,7 @@
+$pdf_mode = 4;
+# Keep font caches in the document directory, including sandboxed agent builds.
+use Cwd qw(getcwd);
+$ENV{'TEXMFVAR'} = getcwd() . '/.tex-cache';
+$ENV{'TEXMFCACHE'} = $ENV{'TEXMFVAR'};
+mkdir $ENV{'TEXMFVAR'} unless -d $ENV{'TEXMFVAR'};
+$lualatex = 'lualatex -interaction=nonstopmode -halt-on-error %O %S';

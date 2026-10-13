@@ -1,0 +1,18 @@
+Information Processing Society of Japan (IPSJ) LaTeX style files
+
+Preset: IPSJ SIG Technical Report, UTF-8 edition
+Source page: https://www.ipsj.or.jp/kenkyukai/genko.html
+Download: https://www.ipsj.or.jp/journal/submit/9faeag0000001nsz-att/ipsj_v4-1.zip
+Upstream release: v4.1, updated 2025-02-05
+
+SHA-256: 99a165ea4e7bccb0ab54a2b9c1f21d19d77744876a20708ee37ec954d00ebc59
+
+The upstream archive does not state an explicit redistribution license.
+Public source exports and distributable apps include this description, NOT
+the upstream ZIP, styles, bibliography or samples. Run npm run templates:ipsj
+after building, or use --archive with the official ZIP. The installer verifies
+SHA-256 and saves selected UTF8 files under user data templates/ipsj/.
+See docs/installation.md.
+
+The private checkout retains original/ipsj_v4-1.zip and unchanged runtime files
+for existing installations. They are not public release assets.
